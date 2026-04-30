@@ -4,8 +4,9 @@ import { extractTextFromPDF } from './utils/pdfParser';
 import { analyzeResume } from './utils/geminiApi';
 
 function App() {
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(!localStorage.getItem('gemini_api_key'));
+  const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const [apiKey, setApiKey] = useState(() => envApiKey || localStorage.getItem('gemini_api_key') || '');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(!envApiKey && !localStorage.getItem('gemini_api_key'));
   
   const [file, setFile] = useState(null);
   const [jobDescription, setJobDescription] = useState('');
@@ -90,10 +91,17 @@ function App() {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="AIzaSy..."
+              disabled={!!envApiKey}
             />
-            <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              Your key is stored locally in your browser. Get a free key from Google AI Studio.
-            </p>
+            {envApiKey ? (
+              <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--success)' }}>
+                API Key is securely configured via environment variables.
+              </p>
+            ) : (
+              <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                Your key is stored locally in your browser. Get a free key from Google AI Studio.
+              </p>
+            )}
           </div>
           <button className="btn btn-primary" onClick={() => setIsSettingsOpen(false)}>
             Save & Close
